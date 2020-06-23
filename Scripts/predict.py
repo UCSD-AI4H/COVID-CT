@@ -36,7 +36,7 @@ def image_load(path):
 image = image_load(argv[1])
 
 # Load model
-model = models.densenet169(pretrained=True)
+model = models.densenet169(pretrained=True, map_location=torch.device('cpu'))
 if torch.cuda.is_available():
     model = model.cuda()
 pt_net = torch.load('../baseline methods/Self-Trans/Self-Trans.pt')

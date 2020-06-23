@@ -47,22 +47,25 @@ model.eval()
 output = model(image)
 
 # Print result
-print(output.argmax(dim=1, keepdim=True).item())
+#print(output.argmax(dim=1, keepdim=True).item())
+print(output.argmax().item())
 
-#sys.exit(0)
+exit(0)
 
 # Some more testing (delete me)
-covid = glob.glob("../Images-processed/CT_COVID/*.*g")
-TP = 0
-FN = 0
+with open("../Data-split/NonCOVID/testCT_NonCOVID.txt") as f:
+    covid = f.readlines()
+    covid = ["../Images-processed/CT_NonCOVID/" + x.strip() for x in covid]
+FP = 0
+TN = 0
 for im in covid:
     image = image_load(im)
     output = model(image)
     output = int(output.argmax(dim=1, keepdim=True).item())
     if output == 0:
-        FN += 1
+        TN += 1
     if output == 1:
-        TP += 1
+        FP += 1
 
-print("TP:", TP, "FN:", FN)
+print("FP:", FP, "TN:", TN)
 print("DONE")

@@ -46,26 +46,11 @@ model.eval()
 # Run model on provided image
 output = model(image)
 
-# Print result
-#print(output.argmax(dim=1, keepdim=True).item())
-print(output.argmax().item())
-
-exit(0)
-
-# Some more testing (delete me)
-with open("../Data-split/NonCOVID/testCT_NonCOVID.txt") as f:
-    covid = f.readlines()
-    covid = ["../Images-processed/CT_NonCOVID/" + x.strip() for x in covid]
-FP = 0
-TN = 0
-for im in covid:
-    image = image_load(im)
-    output = model(image)
-    output = int(output.argmax(dim=1, keepdim=True).item())
-    if output == 0:
-        TN += 1
-    if output == 1:
-        FP += 1
-
-print("FP:", FP, "TN:", TN)
-print("DONE")
+# Calculate and print result
+pred = int(output.argmax().item())
+if pred == 0:
+    print("This patient is predicted to be COVID-19 positive.")
+elif pred == 1:
+    print("This patient is predicted to be COVID-19 negative.")
+else:
+    print("An unknown error has occurred and the model cannot evaluate the provided data.")

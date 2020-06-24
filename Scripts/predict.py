@@ -10,6 +10,17 @@ import glob
 from os import path
 from sys import argv, exit
 
+# Constants
+
+# Initialize torchvision transformer
+normalize = transforms.Normalize(mean=[0.45271412, 0.45271412, 0.45271412],
+                                     std=[0.33165374, 0.33165374, 0.33165374])
+val_transformer = transforms.Compose([
+    transforms.Resize((224,224)),
+    transforms.ToTensor(),
+    normalize
+])
+
 # Function Definitions
 
 def image_load(path):
@@ -28,15 +39,6 @@ if __name__ == "__main__":
     if len(argv) != 2:
         print("Usage: ./predict.py image.jpg")
         exit(1)
-
-    # Initialize torchvision transformer
-    normalize = transforms.Normalize(mean=[0.45271412, 0.45271412, 0.45271412],
-                                         std=[0.33165374, 0.33165374, 0.33165374])
-    val_transformer = transforms.Compose([
-        transforms.Resize((224,224)),
-        transforms.ToTensor(),
-        normalize
-    ])
 
     # Load image into memory
     image = image_load(argv[1])

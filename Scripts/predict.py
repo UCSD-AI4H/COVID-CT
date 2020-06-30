@@ -44,7 +44,7 @@ if __name__ == "__main__":
     image = image_load(argv[1])
 
     # Get model location
-    selftrans = path.dirname(path.realpath(__file__)) + "Self-Trans.pt"
+    selftrans = path.dirname(path.realpath(__file__)) + "/Self-Trans.pt"
 
     # Load model
     model = models.densenet169(pretrained=True)

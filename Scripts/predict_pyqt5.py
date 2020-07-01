@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+# Fix for PyInstaller
+from os import environ
+environ["PYTORCH_JIT"] = "0"
+
 # Import stuff we will need
 import torch
 from PIL import Image
@@ -40,7 +44,7 @@ class Predict(QWidget):
 	def __init__(self):
 		super().__init__()
 		self.setWindowTitle("COVID-19 Predictor")
-		self.setGeometry(10, 10, 400, 250)
+		self.setFixedSize(400, 250)
 		self.openFileButton = QPushButton("Open File")
 		self.openFileButton.clicked.connect(self.eval)
 		self.label = QLabel("Prediction: (not run)")

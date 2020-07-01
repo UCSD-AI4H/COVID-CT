@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+# Fix for PyInstaller
+from os import environ
+environ["PYTORCH_JIT"] = "0"
+
 # Import stuff we will need
 import torch
 from PIL import Image

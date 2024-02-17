@@ -2,8 +2,22 @@
 # coding: utf-8
 
 # In[147]:
+import os
+from datetime import datetime
+import random 
+import re
 
-
+# In[1]
+import numpy as np
+import pandas as pd
+from PIL import Image
+from PIL import ImageFile
+import matplotlib.pyplot as plt
+from skimage.io import imread, imsave
+import skimage
+from sklearn.metrics import roc_auc_score
+from shutil import copyfile
+# In[1]
 import torch
 import torchvision
 import torchvision.transforms as transforms
@@ -12,67 +26,21 @@ import torch.nn.functional as F
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import Dataset
-import os
-from PIL import Image
-import matplotlib.pyplot as plt
 from torch.optim.lr_scheduler import StepLR
-import numpy as np
-from PIL import ImageFile
 from torch.utils.tensorboard import SummaryWriter
-from datetime import datetime
-import numpy as np
-import pandas as pd
-import os
-import random 
-from shutil import copyfile
-from torch.utils.data import Dataset
 from torchvision.datasets import ImageFolder
-from PIL import Image
 from torch.utils.data import DataLoader
 from torch.utils.data import Dataset
-import re
-import albumentations as albu
-from albumentations.pytorch import ToTensor
-from catalyst.data import Augmentor
+from torchvision import utils
 import torchxrayvision as xrv
 
-
-# In[2]:
-
-
-import torch
-import torchvision
-from torchvision import transforms, utils
-from torch.utils.data import Dataset, DataLoader
-import matplotlib.pyplot as plt
-import torch.optim as optim
-from torch.utils.data import Dataset
-import os
-from PIL import Image
-import matplotlib.pyplot as plt
-from torch.optim.lr_scheduler import StepLR
-from PIL import Image
-import torch.nn.functional as F
-import torch.nn as nn
-import numpy as np
-from sklearn.metrics import roc_auc_score
-import re
+# In[1]
 import albumentations as albu
 from albumentations.pytorch import ToTensor
-from catalyst.data import Augmentor
-from skimage.io import imread, imsave
-import skimage
+from catalyst.contrib.data.augmentor import Augmentor  
 
+# In[2]
 torch.cuda.empty_cache()
-
-
-
-# In[2]:
-
-
-get_ipython().system('pip install --upgrade efficientnet-pytorch')
-
-
 # In[3]:
 
 
@@ -149,37 +117,38 @@ class CovidCTDataset(Dataset):
         return sample
 
 
+ # In[1]   
 
-    
-if __name__ == '__main__':
-    trainset = CovidCTDataset(root_dir='new_data/4.4_image',
-                              txt_COVID='new_data/newtxt/train.txt',
-                              txt_NonCOVID='old_data/oldtxt/trainCT_NonCOVID.txt',
-                              transform= train_transformer)
-    valset = CovidCTDataset(root_dir='new_data/4.4_image',
-                              txt_COVID='new_data/newtxt/val.txt',
-                              txt_NonCOVID='old_data/oldtxt/valCT_NonCOVID.txt',
-                              transform= val_transformer)
-    testset = CovidCTDataset(root_dir='new_data/4.4_image',
-                              txt_COVID='new_data/newtxt/test.txt',
-                              txt_NonCOVID='old_data/oldtxt/testCT_NonCOVID.txt',
-                              transform= val_transformer)
-    print(trainset.__len__())
-    print(valset.__len__())
-    print(testset.__len__())
 
-    train_loader = DataLoader(trainset, batch_size=batchsize, drop_last=False, shuffle=True)
-    val_loader = DataLoader(valset, batch_size=batchsize, drop_last=False, shuffle=False)
-    test_loader = DataLoader(testset, batch_size=batchsize, drop_last=False, shuffle=False)
-    
+trainset = CovidCTDataset(root_dir='../../Images-processed/',
+                            txt_COVID='../../Data-split/COVID/trainCT_COVID.txt',
+                            txt_NonCOVID='../../Data-split/NonCOVID/trainCT_NonCOVID.txt',
+                            transform= train_transformer)
+valset = CovidCTDataset(root_dir='../../Images-processed/',
+                            txt_COVID='../../Data-split/COVID/valCT_COVID.txt',
+                            txt_NonCOVID='../../Data-split/NonCOVID/valCT_NonCOVID.txt',
+                            transform= val_transformer)
+testset = CovidCTDataset(root_dir='../../Images-processed/',
+                            txt_COVID='../../Data-split/COVID/testCT_COVID.txt',
+                            txt_NonCOVID='../../Data-split/NonCOVID/testCT_NonCOVID.txt',
+                            transform= val_transformer)
+print(trainset.__len__())
+print(valset.__len__())
+print(testset.__len__())
+
+train_loader = DataLoader(trainset, batch_size=batchsize, drop_last=False, shuffle=True)
+val_loader = DataLoader(valset, batch_size=batchsize, drop_last=False, shuffle=False)
+test_loader = DataLoader(testset, batch_size=batchsize, drop_last=False, shuffle=False)
+
 
 
 # In[31]:
 
-
-# for batch_index, batch_samples in enumerate(train_dataloader):      
-#         data, target = batch_samples[0], batch_samples[1]
-# skimage.io.imshow(data[0,1,:,:].numpy())
+for batch_index, batch_samples in enumerate(train_loader):
+        print(batch_samples.keys())
+        data, target = batch_samples['img'], batch_samples['label']
+print(data.size()) # 5,3,224,224
+skimage.io.imshow(data[0,1,:,:].numpy())
 
 
 # In[154]:
@@ -433,7 +402,7 @@ class DenseNetModel(nn.Module):
     
 model = DenseNetModel().cuda()
 modelname = 'DenseNet_medical'
-# print(model)
+print(model)
 
 
 # In[146]:
@@ -461,20 +430,17 @@ class SimpleCNN(torch.nn.Module):
  
 model = SimpleCNN().cuda()
 modelname = 'SimpleCNN'
-
+print(model)
 
 # In[119]:
-
 
 ### ResNet18
 import torchvision.models as models
 model = models.resnet18(pretrained=True).cuda()
 modelname = 'ResNet18'
+print(model)
 
-
-# In[106]:
-
-
+# In[119]:
 ### Dense121
 import torchvision.models as models
 model = models.densenet121(pretrained=True).cuda()
@@ -522,17 +488,11 @@ modelname = 'efficientNet-b0'
 # model = EfficientNet.from_name('efficientnet-b1').cuda()
 # modelname = 'efficientNet_random'
 
+# In[139]:
 
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-# train
+"""
+train 
+"""
 bs = 10
 votenum = 10
 import warnings
@@ -614,7 +574,9 @@ for epoch in range(1, total_epoch+1):
 # In[145]:
 
 
-# test
+"""
+ test
+"""
 bs = 10
 import warnings
 warnings.filterwarnings('ignore')
@@ -717,8 +679,4 @@ for epoch in range(1, total_epoch+1):
         f.close()
 
 
-# In[ ]:
-
-
-
-
+# %%
